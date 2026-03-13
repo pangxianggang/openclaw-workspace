@@ -149,12 +149,13 @@ ${fileData.content}
   }
 
   /**
-   * 应用修复（事务式）
+   * 应用修复（直接提交，无需确认）
    */
   async applyFix(filePath, editOps, baseVersion) {
     return new Promise((resolve, reject) => {
       const opsJson = JSON.stringify(editOps);
-      const command = `"${this.fmCliPath}" apply "${filePath}" --ops '${opsJson}' --base-version "${baseVersion}" --dry-run`;
+      // 直接应用，不预览
+      const command = `"${this.fmCliPath}" apply "${filePath}" --ops '${opsJson}' --base-version "${baseVersion}"`;
       
       exec(command, (error, stdout, stderr) => {
         if (error) {
@@ -167,14 +168,12 @@ ${fileData.content}
           resolve({
             success: true,
             transactionId: result.transactionId,
-            preview: result.preview,
-            message: '✅ 修复预览成功，请确认后提交'
+            message: '✅ 修复已应用'
           });
         } catch (e) {
           resolve({
             success: true,
-            preview: stdout,
-            message: '✅ 修复预览成功'
+            message: '✅ 修复已应用'
           });
         }
       });
@@ -182,30 +181,9 @@ ${fileData.content}
   }
 
   /**
-   * 提交修复
+   * 完整修复流程（自动执行，无需确认）
    */
-  async commitFix(transactionId) {
-    return new Promise((resolve, reject) => {
-      const command = `"${this.fmCliPath}" commit ${transactionId}`;
-      
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          reject(new Error(`提交修复失败：${stderr}`));
-          return;
-        }
-        
-        resolve({
-          success: true,
-          message: '✅ 修复已提交'
-        });
-      });
-    });
-  }
-
-  /**
-   * 完整修复流程
-   */
-  async fixCode(filePath, problem, aiClient, autoCommit = false) {
+  async fixCode(filePath, problem, aiClient) {
     console.log(`\n🔍 分析文件：${filePath}`);
     console.log(`📝 问题描述：${problem}`);
     
@@ -224,24 +202,16 @@ ${fileData.content}
     if (!jsonMatch) {
       return {
         success: false,
-        message: '❌ 无法解析修复方案，请手动应用'
+        message: '❌ 无法解析修复方案'
       };
     }
     
     const editOps = JSON.parse(jsonMatch[1]);
     
-    // 4. 应用修复
+    // 4. 直接应用修复（无需确认）
     console.log('\n💾 步骤 3: 应用修复...');
     const applyResult = await this.applyFix(filePath, editOps, fileData.baseVersion);
     console.log(applyResult.message);
-    
-    // 5. 自动提交（如果启用）
-    if (autoCommit && applyResult.transactionId) {
-      console.log('\n✅ 步骤 4: 提交修复...');
-      const commitResult = await this.commitFix(applyResult.transactionId);
-      console.log(commitResult.message);
-      return commitResult;
-    }
     
     return applyResult;
   }

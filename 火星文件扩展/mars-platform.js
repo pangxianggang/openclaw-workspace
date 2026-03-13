@@ -107,12 +107,12 @@ const SUPPORTED_MODELS = [
   { id: 'MiniMax-M2.5', name: 'MiniMax M2.5', provider: 'MiniMax' },
 ];
 
-// 全局状态 - 连续执行控制
+// 全局状态 - 连续执行控制（已禁用确认）
 let continuousExecutionState = {
-  isActive: false,        // 是否处于连续执行模式
-  iterationsUsed: 0,      // 已用迭代次数
-  maxIterations: 10,      // 最大迭代次数
-  pendingTask: null,      // 挂起的任务描述
+  isActive: false,
+  iterationsUsed: 0,
+  maxIterations: 20,      // 增加到 20 次，自动执行
+  pendingTask: null,
 };
 
 // 对话历史
@@ -779,56 +779,16 @@ function showWelcome() {
   }
 }
 
-// 显示继续/停止确认
+// 显示继续/停止确认（已禁用，自动继续）
 function showContinuePrompt(taskDescription, iterationsUsed) {
-  print(COLORS.reset, '');
-  print(COLORS.yellow, '═══════════════════════════════════════════════════════════');
-  print(COLORS.yellow, '  ⚠️  任务尚未完成，是否继续执行？');
-  print(COLORS.yellow, '═══════════════════════════════════════════════════════════');
-  print(COLORS.reset, '');
-  print(COLORS.white, `  已执行迭代：${iterationsUsed} 次`);
-  print(COLORS.white, `  当前任务：${taskDescription}\n`);
-  print(COLORS.cyan, '  选择：\n');
-  print(COLORS.white, '    [1] 继续执行（让 AI 继续完成任务）');
-  print(COLORS.white, '    [2] 停止执行（查看当前结果）');
-  print(COLORS.white, '    [3] 增加迭代次数（设置新的最大值）');
-  print(COLORS.white, '    [4] 查看详细历史');
-  print(COLORS.reset, '');
+  // 自动继续，不显示确认
+  print(COLORS.dim, `  [自动继续执行 - 迭代 ${iterationsUsed}]\n`);
 }
 
-// 等待用户选择（继续/停止）
+// 等待用户选择（已禁用，自动继续）
 async function waitForContinueStop() {
-  return new Promise((resolve) => {
-    const promptText = COLORS.brightYellow + '\n  请选择 [1-4]: ' + COLORS.reset;
-    rl.question(promptText, (answer) => {
-      const choice = answer.trim().toLowerCase();
-
-      if (choice === '1' || choice === '继续' || choice === 'y') {
-        resolve('continue');
-      } else if (choice === '2' || choice === '停止' || choice === 'n') {
-        resolve('stop');
-      } else if (choice === '3' || choice === '增加') {
-        rl.question(COLORS.cyan + '  请输入新的最大迭代次数 (当前 10): ' + COLORS.reset, (newMax) => {
-          const num = parseInt(newMax);
-          if (num > 0 && num <= 50) {
-            CONTEXT_CONFIG.maxIterations = num;
-            print(COLORS.green, `  最大迭代次数已设置为：${num}\n`);
-            resolve('continue');
-          } else {
-            print(COLORS.yellow, '  无效的输入，使用默认值 10\n');
-            CONTEXT_CONFIG.maxIterations = 10;
-            resolve('continue');
-          }
-        });
-      } else if (choice === '4' || choice === '详情') {
-        showHistory();
-        resolve('continue');
-      } else {
-        print(COLORS.yellow, '  默认继续执行\n');
-        resolve('continue');
-      }
-    });
-  });
+  // 自动继续
+  return 'continue';
 }
 
 // 主对话循环
@@ -996,19 +956,18 @@ async function chatLoop() {
             const aiClient = {
               chat: async (prompt) => {
                 const messages = [
-                  { role: 'system', content: '你是一个专业的代码修复专家。' },
+                  { role: 'system', content: '你是一个专业的代码修复专家。直接修复，无需确认。' },
                   { role: 'user', content: prompt }
                 ];
                 return await callAI(messages);
               }
             };
             
-            print(COLORS.cyan, '\n  🔍 开始分析代码问题...\n');
-            const result = await codeFixer.fixCode(filePath, problem, aiClient, false);
+            print(COLORS.cyan, '\n  🔍 开始自动修复代码...\n');
+            const result = await codeFixer.fixCode(filePath, problem, aiClient);
             
             if (result.success) {
               print(COLORS.brightGreen, `  ✅ ${result.message}\n`);
-              print(COLORS.gray, '  提示：预览无误后，使用 /commit <transactionId> 提交修复\n');
             } else {
               print(COLORS.brightYellow, `  ⚠️ ${result.message}\n`);
             }
@@ -1016,7 +975,6 @@ async function chatLoop() {
             print(COLORS.brightRed, `  ❌ 修复失败：${error.message}\n`);
           }
           continue;
-        } else if (cmd === 'commit') {
           const transactionId = args.join(' ').trim();
           if (!transactionId) {
             print(COLORS.brightYellow, '  用法：/commit <transactionId>\n');
