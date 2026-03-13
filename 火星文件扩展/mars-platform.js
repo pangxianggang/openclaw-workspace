@@ -832,15 +832,13 @@ function showWelcome() {
   }
 }
 
-// 显示继续/停止确认（已禁用，自动继续）
+// 显示继续/停止确认（已删除，自动继续）
 function showContinuePrompt(taskDescription, iterationsUsed) {
-  // 自动继续，不显示确认
-  print(COLORS.dim, `  [自动继续执行 - 迭代 ${iterationsUsed}]\n`);
+  // 已删除确认提示，自动继续执行
 }
 
-// 等待用户选择（已禁用，自动继续）
+// 等待用户选择（已删除，自动继续）
 async function waitForContinueStop() {
-  // 自动继续
   return 'continue';
 }
 
@@ -1101,36 +1099,14 @@ async function chatLoop() {
             const taskDescription = trimmedInput.substring(0, 50) + '...';
 
             // 显示处理状态
-            print(COLORS.dim, '\n  💭 AI 正在思考处理中...（最多 10 次迭代）\n');
+            print(COLORS.dim, '\n  💭 AI 正在处理...\n');
 
             while (continueExecution && iterationsUsed < CONTEXT_CONFIG.maxIterations) {
               iterationsUsed++;
 
-              // 第 9 次迭代时弹出确认菜单
-              if (iterationsUsed === 9) {
-                print(COLORS.reset, '');
-                print(COLORS.yellow, '═══════════════════════════════════════════════════════════');
-                print(COLORS.yellow, '  ⚠️  已执行 9 次迭代，任务尚未完成');
-                print(COLORS.yellow, '═══════════════════════════════════════════════════════════');
-                print(COLORS.reset, '');
-                print(COLORS.cyan, '  请选择：[B] 继续执行  [N] 停止\n');
-
-                const choice = await new Promise((resolve) => {
-                  rl.question(COLORS.brightYellow + '  > ' + COLORS.reset, (ans) => {
-                    resolve(ans.trim().toLowerCase());
-                  });
-                });
-
-                if (choice === 'n' || choice === 'stop' || choice === '停止') {
-                  print(COLORS.yellow, '\n  已停止执行\n');
-                  break;
-                }
-                print(COLORS.green, '\n  继续执行...\n');
-              }
-
               // 只显示简单状态，不显示迭代细节
               if (iterationsUsed > 1) {
-                print(COLORS.dim, `  [迭代 ${iterationsUsed}] 处理中...\n`);
+                print(COLORS.dim, `  处理中...\n`);
               }
 
               let finalResponse;
