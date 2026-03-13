@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彩虹动画示例 - CodeGPS Pro</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);            background-size: 600% 600%; /* 增加渐变尺寸使过渡更平滑 */            animation: gradientBG 15s ease-in-out infinite; /* 使循环过渡更自然 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 星空背景 */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+
+        /* 流体波浪背景 */        .fluid-waves {
+            position: absolute;
+            z-index: 1; /* 提升至星空层之上 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            opacity: 0.6;
+        }
+
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, 
+                rgba(255, 105, 180, 0.15) 0%, 
+                rgba(100, 200, 255, 0.12) 25%, 
+                rgba(50, 255, 150, 0.1) 50%, 
+                transparent 70%);
+            border-radius: 40%;
+            animation: waveFloat 20s infinite linear;
+            filter: blur(30px); /* 略微降低模糊半径 */
+            transform: translateZ(0); /* 强制 GPU 渲染 */
+            transform-origin: center;
+        }
+
+        .wave:nth-child(2) {
+            animation: waveFloat 25s infinite linear reverse;
+            background: radial-gradient(circle at center, 
+                rgba(255, 255, 105, 0.12) 0%, 
+                rgba(255, 105, 180, 0.1) 25%, 
+                rgba(100, 200, 255, 0.08) 50%, 
+                transparent 70%);
+            opacity: 0.8;
+        }
+
+        .wave:nth-child(3) {
+            animation: waveFloat 30s infinite linear;
+            background: radial-gradient(circle at center, 
+                rgba(50, 255, 150, 0.1) 0%, 
+                rgba(255, 255, 105, 0.08) 25%, 
+                rgba(255, 105, 180, 0.06) 50%, 
+                transparent 70%);
+            opacity: 0.7;
+        }
+
+        @keyframes waveFloat {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg) scale(1);
+            }
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        /* 流星效果 */
+        .meteor {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(45deg, transparent, #fff, transparent);
+            border-radius: 50%;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)); /* 增强光晕强度 */
+            animation: meteorFall 3s linear infinite;
+            opacity: 0;
+        }
+
+        .meteor::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 150px;
+            height: 1px;
+            background: linear-gradient(90deg, #fff, transparent);
+            right: 2px;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* 星空闪烁动画 */
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes meteorFall {
+            0% {
+                transform: translateX(0) translateY(0) rotate(45deg);
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(300px) translateY(300px) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        .rainbow-text {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(90deg,
+                    #ff0000, #ff7f00, #ffff00,
+                    #00ff00, #0000ff, #4b0082, #9400d3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow 3s linear infinite, textGlow 2s ease-in-out infinite alternate, text3D 8s ease-in-out infinite;
+            background-size: 200% 100%;
+            position: relative;
+            text-shadow:
+                0 1px 0 #ccc,
+                0 2px 0 #c9c9c9,
+                0 3px 0 #bbb,
+                0 4px 0 #b9b9b9,
+                0 5px 0 #aaa,
+                0 6px 1px rgba(0, 0, 0, .1),
+                0 0 5px rgba(0, 0, 0, .1),
+                0 1px 3px rgba(0, 0, 0, .3),
+                0 3px 5px rgba(0, 0, 0, .2),
+                0 5px 10px rgba(0, 0, 0, .25),
+                0 10px 10px rgba(0, 0, 0, .2),
+                0 20px 20px rgba(0, 0, 0, .15),
+                0 0 30px rgba(255, 255, 255, 0.5),
+                0 0 60px rgba(255, 105, 180, 0.3),
+                0 0 90px rgba(100, 200, 255, 0.2);
+            transform-style: preserve-3d;
+            transform: perspective(500px) rotateX(0deg);
+            transition: transform 0.6s ease;
+        }
+
+        /* 霓虹光晕增强 */
+        .rainbow-text:hover {
+            animation: rainbow 1.5s linear infinite, textGlow 1s ease-in-out infinite alternate, text3D 6s ease-in-out infinite, neonPulse 2s ease-in-out infinite;
+            filter: brightness(1.2) drop-shadow(0 0 40px rgba(255, 105, 180, 0.8)) drop-shadow(0 0 60px rgba(100, 200, 255, 0.6)) drop-shadow(0 0 80px rgba(50, 255, 150, 0.4));
+            transform: perspective(500px) rotateX(5deg) rotateY(5deg) scale(1.05);
+        }
+
+        @keyframes neonPulse {
+            0%, 100% {
+                text-shadow:
+                    0 1px 0 #ccc,
+                    0 2px 0 #c9c9c9,
+                    0 3px 0 #bbb,
+                    0 4px 0 #b9b9b9,
+                    0 5px 0 #aaa,
+                    0 6px 1px rgba(0, 0, 0, .1),
+                    0 0 5px rgba(0, 0, 0, .1),
+                    0 1px 3px rgba(0, 0, 0, .3),
+                    0 3px 5px rgba(0, 0, 0, .2),
+                    0 5px 10px rgba(0, 0, 0, .25),
+                    0 10px 10px rgba(0, 0, 0, .2),
+                    0 20px 20px rgba(0, 0, 0, .15),
+                    0 0 40px rgba(255, 255, 255, 0.8),
+                    0 0 80px rgba(255, 105, 180, 0.6),
+                    0 0 120px rgba(100, 200, 255, 0.4),
+                    0 0 160px rgba(50, 255, 150, 0.2);
+            }
+            50% {
+                text-shadow:
+                    0 1px 0 #ccc,
+                    0 2px 0 #c9c9c9,
+                    0 3px 0 #bbb,
+                    0 4px 0 #b9b9b9,
+                    0 5px 0 #aaa,
+                    0 6px 1px rgba(0, 0, 0, .1),
+                    0 0 5px rgba(0, 0, 0, .1),
+                    0 1px 3px rgba(0, 0, 0, .3),
+                    0 3px 5px rgba(0, 0, 0, .2),
+                    0 5px 10px rgba(0, 0, 0, .25),
+                    0 10px 10px rgba(0, 0, 0, .2),
+                    0 20px 20px rgba(0, 0, 0, .15),
+                    0 0 50px rgba(255, 255, 255, 1),
+                    0 0 100px rgba(255, 105, 180, 0.8),
+                    0 0 150px rgba(100, 200, 255, 0.6),
+                    0 0 200px rgba(50, 255, 150, 0.4);
+            }
+        }
+
+        /* 3D文字层效果 */
+        .rainbow-text::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: linear-gradient(90deg,
+                    rgba(255, 0, 0, 0.8), rgba(255, 127, 0, 0.8), rgba(255, 255, 0, 0.8),
+                    rgba(0, 255, 0, 0.8), rgba(0, 0, 255, 0.8), rgba(75, 0, 130, 0.8), rgba(148, 0, 211, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            z-index: -1;
+            transform: translateZ(-20px) scale(1.05);
+            filter: blur(2px);
+            opacity: 0.7;
+        }
+
+        .rainbow-text::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: linear-gradient(90deg,
+                    rgba(255, 0, 0, 0.6), rgba(255, 127, 0, 0.6), rgba(255, 255, 0, 0.6),
+                    rgba(0, 255, 0, 0.6), rgba(0, 0, 255, 0.6), rgba(75, 0, 130, 0.6), rgba(148, 0, 211, 0.6));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            z-index: -2;
+            transform: translateZ(-40px) scale(1.1);
+            filter: blur(4px);
+            opacity: 0.5;
+        }
+
+        @keyframes rainbow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes textGlow {
+            0% {
+                filter: brightness(1) drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+            }
+
+            50% {
+                filter: brightness(1.2) drop-shadow(0 0 40px rgba(255, 105, 180, 0.8));
+            }
+
+            100% {
+                filter: brightness(1) drop-shadow(0 0 20px rgba(100, 200, 255, 0.5));
+            }
+        }
+
+        @keyframes text3D {
+
+            0%,
+            100% {
+                transform: perspective(500px) rotateX(0deg) rotateY(0deg);
+            }
+
+            25% {
+                transform: perspective(500px) rotateX(5deg) rotateY(5deg);
+            }
+
+            50% {
+                transform: perspective(500px) rotateX(-3deg) rotateY(-5deg);
+            }
+
+            75% {
+                transform: perspective(500px) rotateX(3deg) rotateY(3deg);
+            }
+        }
+
+        /* 打字机效果 */
+        .typewriter {
+            overflow: hidden;
+            border-right: 3px solid rgba(255, 255, 255, 0.7);
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0
+            }
+
+            to {
+                width: 100%
+            }
+        }
+
+        @keyframes blink-caret {
+
+            from,
+            to {
+                border-color: transparent
+            }
+
+            50% {
+                border-color: rgba(255, 255, 255, 0.7)
+            }
+        }
+
+        .container {
+            text-align: center;
+            padding: 4rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(35px) saturate(200%) brightness(1.1);
+            -webkit-backdrop-filter: blur(35px) saturate(200%) brightness(1.1);
+            border-radius: 32px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.18),
+                inset 0 1px 1px rgba(255, 255, 255, 0.15),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+                0 0 100px rgba(255, 105, 180, 0.25),
+                0 0 150px rgba(100, 200, 255, 0.2),
+                0 0 200px rgba(50, 255, 150, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            position: relative;
+            z-index: 10;
+            animation: containerGlow 6s ease-in-out infinite, glassFloat 8s ease-in-out infinite;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg,
+                    rgba(255, 105, 180, 0.3),
+                    rgba(100, 200, 255, 0.3),
+                    rgba(50, 255, 150, 0.3),
+                    rgba(255, 255, 105, 0.3));
+            border-radius: 34px;
+            z-index: -1;
+            animation: neonBorder 4s linear infinite;
+            filter: blur(8px);
+            opacity: 0.7;
+        }
+
+        @keyframes containerGlow {
+
+            0%,
+            100% {
+                box-shadow:
+                    0 8px 32px rgba(0, 0, 0, 0.2),
+                    0 0 0 1px rgba(255, 255, 255, 0.1),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                    0 0 80px rgba(255, 105, 180, 0.2),
+                    0 0 120px rgba(100, 200, 255, 0.15),
+                    0 0 160px rgba(50, 255, 150, 0.1);
+            }
+
+            33% {
+                box-shadow:
+                    0 8px 32px rgba(0, 0, 0, 0.2),
+                    0 0 0 1px rgba(255, 255, 255, 0.1),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                    0 0 80px rgba(100, 200, 255, 0.2),
+                    0 0 120px rgba(50, 255, 150, 0.15),
+                    0 0 160px rgba(255, 105, 180, 0.1);
+            }
+
+            66% {
+                box-shadow:
+                    0 8px 32px rgba(0, 0, 0, 0.2),
+                    0 0 0 1px rgba(255, 255, 255, 0.1),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                    0 0 80px rgba(50, 255, 150, 0.2),
+                    0 0 120px rgba(255, 105, 180, 0.15),
+                    0 0 160px rgba(100, 200, 255, 0.1);
+            }
+        }
+
+        @keyframes neonBorder {
+
+            0%,
+            100% {
+                background: linear-gradient(45deg,
+                        rgba(255, 105, 180, 0.4),
+                        rgba(100, 200, 255, 0.4),
+                        rgba(50, 255, 150, 0.4));
+            }
+
+            33% {
+                background: linear-gradient(45deg,
+                        rgba(100, 200, 255, 0.4),
+                        rgba(50, 255, 150, 0.4),
+                        rgba(255, 105, 180, 0.4));
+            }
+
+            66% {
+                background: linear-gradient(45deg,
+                        rgba(50, 255, 150, 0.4),
+                        rgba(255, 105, 180, 0.4),
+                        rgba(100, 200, 255, 0.4));
+            }
+        }
+
+        /* 玻璃拟态浮动动画 */
+        @keyframes glassFloat {
+            0%, 100% {
+                transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+            }
+            33% {
+                transform: translateY(-5px) rotateX(1deg) rotateY(1deg);
+            }
+            66% {
+                transform: translateY(5px) rotateX(-1deg) rotateY(-1deg);
+            }
+        }
+
+        button {
+            margin-top: 2.5rem;
+            padding: 16px 40px;
+            font-size: 1.3rem;
+            background: linear-gradient(90deg, #ff6b6b, #ffa726, #66bb6a, #42a5f5, #ab47bc);
+            background-size: 300% 100%;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            font-weight: 600;
+            letter-spacing: 1px;
+            animation: buttonGradient 4s ease infinite;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes buttonGradient {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        button:hover {
+            transform: scale(1.15) translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        .floating-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 3D视差粒子系统 */
+        .parallax-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .parallax-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
+            box-shadow: 
+                0 0 15px rgba(255, 255, 255, 0.8),
+                0 0 30px rgba(255, 105, 180, 0.4),
+                0 0 45px rgba(100, 200, 255, 0.3);
+            filter: blur(1px);
+            animation: parallaxFloat 15s infinite ease-in-out;
+            transform-style: preserve-3d;
+            will-change: transform, opacity;
+        }
+
+        .parallax-particle.special {
+            background: radial-gradient(circle, #ff6b6b, #4ecdc4);
+            box-shadow: 
+                0 0 25px rgba(255, 107, 107, 0.8),
+                0 0 50px rgba(78, 205, 196, 0.6),
+                0 0 75px rgba(255, 255, 255, 0.4);
+            animation: parallaxFloatSpecial 12s infinite ease-in-out;
+        }
+
+        @keyframes parallaxFloat {
+            0%, 100% {
+                transform: 
+                    translate3d(0, 0, 0) 
+                    rotateX(0deg) 
+                    rotateY(0deg) 
+                    scale(1);
+                opacity: 0.3;
+            }
+            25% {
+                transform: 
+                    translate3d(30px, -50px, 20px) 
+                    rotateX(45deg) 
+                    rotateY(45deg) 
+                    scale(1.3);
+                opacity: 0.8;
+            }
+            50% {
+                transform: 
+                    translate3d(-20px, -80px, 40px) 
+                    rotateX(90deg) 
+                    rotateY(90deg) 
+                    scale(1.5);
+                opacity: 1;
+            }
+            75% {
+                transform: 
+                    translate3d(40px, -30px, 10px) 
+                    rotateX(135deg) 
+                    rotateY(135deg) 
+                    scale(1.2);
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes parallaxFloatSpecial {
+            0%, 100% {
+                transform: 
+                    translate3d(0, 0, 0) 
+                    scale(1);
+                opacity: 0.5;
+            }
+            33% {
+                transform: 
+                    translate3d(50px, -70px, 60px) 
+                    scale(1.5);
+                opacity: 0.9;
+            }
+            66% {
+                transform: 
+                    translate3d(-30px, -40px, 30px) 
+                    scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.4rem;
+            margin-top: 1rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            animation: subtitleFadeIn 2s ease-out 1.5s both;
+        }
+
+        @keyframes subtitleFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .container:hover {
+            transform: translateY(-15px) rotateX(8deg) rotateY(8deg) scale(1.02);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+            backdrop-filter: blur(40px) saturate(220%) brightness(1.15);
+            -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.15);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.35),
+                0 0 0 1px rgba(255, 255, 255, 0.22),
+                inset 0 1px 1px rgba(255, 255, 255, 0.2),
+                inset 0 -1px 1px rgba(0, 0, 0, 0.15),
+                0 0 120px rgba(255, 105, 180, 0.35),
+                0 0 180px rgba(100, 200, 255, 0.25),
+                0 0 240px rgba(50, 255, 150, 0.2);
+        }
+
+        /* 色彩流动效果 */
+        .color-flow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+            filter: blur(60px);
+            mix-blend-mode: screen;
+            animation: colorFlowMove 20s linear infinite;
+        }
+
+        @keyframes colorFlowMove {
+            0% {
+                background: radial-gradient(circle at 0% 50%, 
+                    rgba(255, 105, 180, 0.3) 0%, 
+                    rgba(100, 200, 255, 0.2) 50%, 
+                    transparent 100%);
+                transform: translateX(-50%) translateY(-50%) scale(1);
+            }
+            25% {
+                background: radial-gradient(circle at 100% 0%, 
+                    rgba(100, 200, 255, 0.3) 0%, 
+                    rgba(50, 255, 150, 0.2) 50%, 
+                    transparent 100%);
+                transform: translateX(50%) translateY(-50%) scale(1.2);
+            }
+            50% {
+                background: radial-gradient(circle at 50% 100%, 
+                    rgba(50, 255, 150, 0.3) 0%, 
+                    rgba(255, 255, 105, 0.2) 50%, 
+                    transparent 100%);
+                transform: translateX(0%) translateY(50%) scale(1);
+            }
+            75% {
+                background: radial-gradient(circle at 0% 100%, 
+                    rgba(255, 255, 105, 0.3) 0%, 
+                    rgba(255, 105, 180, 0.2) 50%, 
+                    transparent 100%);
+                transform: translateX(-50%) translateY(50%) scale(1.2);
+            }
+            100% {
+                background: radial-gradient(circle at 0% 50%, 
+                    rgba(255, 105, 180, 0.3) 0%, 
+                    rgba(100, 200, 255, 0.2) 50%, 
+                    transparent 100%);
+                transform: translateX(-50%) translateY(-50%) scale(1);
+            }
+        }
+
+        /* 背景光斑效果 */
+        .light-spots {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .light-spot {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%);
+            filter: blur(40px);
+            animation: lightSpotFloat 20s infinite ease-in-out;
+        }
+
+        @keyframes lightSpotFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.3;
+            }
+
+            25% {
+                transform: translate(100px, 50px) scale(1.2);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translate(50px, 100px) scale(1.1);
+                opacity: 0.4;
+            }
+
+            75% {
+                transform: translate(-50px, 80px) scale(1.3);
+                opacity: 0.6;
+            }
+        }
+
+        /* 鼠标跟随特效 */
+        .cursor-trail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .cursor-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #ff6b6b, #ffa726);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: cursorPulse 1s infinite alternate;
+        }
+
+        .cursor-trail-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: trailFade 0.8s forwards;
+        }
+
+        @keyframes cursorPulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes trailFade {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 魔法特效 */
+        .magic-sparkle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #fff, #ffeb3b);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparklePop 1s ease-out forwards;
+            box-shadow: 0 0 20px #ffeb3b;
+        }
+
+        @keyframes sparklePop {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 动态文字效果 */
+        .dynamic-text {
+            display: inline-block;
+            animation: textBounce 0.5s ease;
+        }
+
+        @keyframes textBounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        /* 页面加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 1s ease-out;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        .loading-text {
+            position: absolute;
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 120px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* 鼠标悬停波纹效果 */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent 70%);
+            transform: scale(0);
+            animation: rippleEffect 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+                border-radius: 24px;
+                backdrop-filter: blur(25px) saturate(180%) brightness(1.05);
+                -webkit-backdrop-filter: blur(25px) saturate(180%) brightness(1.05);
+            }
+            
+            .rainbow-text {
+                font-size: 2.5rem;
+                animation: rainbow 3s linear infinite, textGlow 2s ease-in-out infinite alternate;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            button {
+                padding: 14px 32px;
+                font-size: 1.1rem;
+            }
+            
+            /* 移动设备减少粒子数量 */
+            .parallax-particle {
+                opacity: 0.2 !important;
+            }
+            
+            .parallax-particle:nth-child(n+16) {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+                backdrop-filter: blur(20px) saturate(160%) brightness(1.02);
+                -webkit-backdrop-filter: blur(20px) saturate(160%) brightness(1.02);
+            }
+            
+            .rainbow-text {
+                font-size: 2rem;
+                text-shadow:
+                    0 1px 0 #ccc,
+                    0 2px 0 #c9c9c9,
+                    0 3px 0 #bbb,
+                    0 4px 0 #b9b9b9,
+                    0 5px 0 #aaa,
+                    0 6px 1px rgba(0, 0, 0, .1),
+                    0 0 5px rgba(0, 0, 0, .1),
+                    0 1px 3px rgba(0, 0, 0, .3),
+                    0 3px 5px rgba(0, 0, 0, .2),
+                    0 5px 10px rgba(0, 0, 0, .25),
+                    0 10px 10px rgba(0, 0, 0, .2),
+                    0 20px 20px rgba(0, 0, 0, .15),
+                    0 0 30px rgba(255, 255, 255, 0.5),
+                    0 0 60px rgba(255, 105, 180, 0.3);
+            }
+            
+            .typewriter {
+                white-space: normal;
+                border-right: none;
+                animation: none;
+            }
+            
+            /* 小屏幕隐藏部分特效 */
+            .color-flow {
+                opacity: 0.2;
+                filter: blur(30px);
+            }
+            
+            .fluid-waves {
+                opacity: 0.3;
+            }
+        }
+
+        /* 脉冲光环 */
+        .pulse-ring {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: pulseExpand 4s ease-out infinite;
+            pointer-events: none;
+        }
+
+        /* 镭射光线 */
+        .laser-light {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.8) 20%,
+                    rgba(255, 105, 180, 1) 50%,
+                    rgba(100, 200, 255, 0.8) 80%,
+                    transparent 100%);
+            transform-origin: center;
+            animation: laserMove 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.8));
+            opacity: 0;
+        }
+
+        /* 环境光感应 */
+        .ambient-light {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle,
+                    rgba(255, 255, 255, 0.1) 0%,
+                    rgba(100, 200, 255, 0.05) 30%,
+                    rgba(255, 105, 180, 0.03) 60%,
+                    transparent 100%);
+            border-radius: 50%;
+            filter: blur(30px);
+            animation: ambientFloat 10s ease-in-out infinite;
+        }
+
+        @keyframes beamScan {
+            0% {
+                left: -100px;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.6;
+            }
+
+            90% {
+                opacity: 0.6;
+            }
+
+            100% {
+                left: 100%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulseExpand {
+            0% {
+                width: 10px;
+                height: 10px;
+                opacity: 0.8;
+                border-color: rgba(255, 255, 255, 0.8);
+            }
+
+            100% {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+                border-color: rgba(100, 200, 255, 0.2);
+            }
+        }
+
+        @keyframes laserMove {
+
+            0%,
+            100% {
+                width: 0;
+                opacity: 0;
+                transform: rotate(0deg);
+            }
+
+            20% {
+                width: 200px;
+                opacity: 0.8;
+            }
+
+            50% {
+                width: 400px;
+                opacity: 1;
+                transform: rotate(15deg);
+            }
+
+            80% {
+                width: 200px;
+                opacity: 0.8;
+                transform: rotate(-10deg);
+            }
+        }
+
+        @keyframes ambientFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.3;
+            }
+
+            33% {
+                transform: translate(100px, -50px) scale(1.2);
+                opacity: 0.5;
+            }
+
+            66% {
+                transform: translate(-50px, 100px) scale(0.8);
+                opacity: 0.4;
+            }
+        }
+
+        /* 粒子爆炸效果 */
+        .explosion-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #fff, #ff6b6b);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .explosion-ring {
+            position: absolute;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: explosionRingExpand 1s ease-out forwards;
+        }
+
+        .explosion-shockwave {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: shockwaveExpand 1.5s ease-out forwards;
+        }
+
+        @keyframes explosionRingExpand {
+            0% {
+                width: 20px;
+                height: 20px;
+                opacity: 1;
+                border-color: rgba(255, 255, 255, 0.9);
+                transform: translate(-50%, -50%) scale(0);
+            }
+
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+                border-color: rgba(255, 105, 180, 0.2);
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes shockwaveExpand {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(3);
+                opacity: 0;
+            }
+        }
+
+        @keyframes particleExplode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载魔法效果...</div>
+    </div>
+    <div class="stars" id="stars"></div>
+    <div class="light-spots" id="lightSpots"></div>
+    <div class="fluid-waves" id="fluidWaves"></div>
+    <div class="parallax-particles" id="parallaxParticles"></div>
+    <div class="color-flow" id="colorFlow"></div>
+    <div class="container">
+        <h1 class="rainbow-text typewriter" data-text="Hello, CodeGPS!">Hello, CodeGPS!</h1>
+        <p class="subtitle">欢迎使用智能编程平台</p>
+        <button onclick="triggerMagic()">✨ 魔法时刻 ✨</button>
+        <div class="floating-particles" id="particles"></div>
+        <div class="dynamic-lights" id="dynamicLights"></div>
+        <div class="cursor-trail" id="cursorTrail"></div>
+        <script>
+            // 创建星空背景
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = (1 + Math.random() * 3) + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 5 + 's';
+                star.style.animationDuration = (2 + Math.random() * 4) + 's';
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 创建悬浮粒子效果
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // 随机位置和动画延迟
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (3 + Math.random() * 4) + 's';
+                
+                // 随机大小和透明度
+                const size = 2 + Math.random() * 4;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.opacity = 0.3 + Math.random() * 0.4;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 鼠标跟随特效
+        function initCursorTrail() {
+            const trailContainer = document.getElementById('cursorTrail');
+            let mouseX = 0, mouseY = 0;
+            
+            // 主光标点
+            const cursorDot = document.createElement('div');
+            cursorDot.className = 'cursor-dot';
+            trailContainer.appendChild(cursorDot);
+            
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                // 更新主光标位置
+                cursorDot.style.left = (mouseX - 4) + 'px';
+                cursorDot.style.top = (mouseY - 4) + 'px';
+                
+                // 创建轨迹粒子
+                if (Math.random() > 0.7) {
+                    const trailParticle = document.createElement('div');
+                    trailParticle.className = 'cursor-trail-particle';
+                    trailParticle.style.left = (mouseX - 3) + 'px';
+                    trailParticle.style.top = (mouseY - 3) + 'px';
+                    trailContainer.appendChild(trailParticle);
+                    
+                    // 自动移除粒子
+                    setTimeout(() => {
+                        trailParticle.remove();
+                    }, 800);
+                }
+            });
+        }
+
+        // 魔法特效函数
+        function triggerMagic() {
+            const container = document.querySelector('.container');
+            const button = document.querySelector('button');
+            const rect = button.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // 按钮动画
+            button.classList.add('dynamic-text');
+            setTimeout(() => button.classList.remove('dynamic-text'), 500);
+            
+            // 创建爆炸效果
+            createExplosion(centerX, centerY);
+            
+            // 文字颜色变化
+            const rainbowText = document.querySelector('.rainbow-text');
+            rainbowText.style.animationDuration = '1s';
+            setTimeout(() => {
+                rainbowText.style.animationDuration = '3s';
+            }, 1000);
+        }
+        
+        // 粒子爆炸效果
+        function createExplosion(x, y) {
+            const particleCount = 50;
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9', '#ff7675', '#74b9ff'];
+            
+            // 创建爆炸环
+            const ring = document.createElement('div');
+            ring.className = 'explosion-ring';
+            ring.style.left = x + 'px';
+            ring.style.top = y + 'px';
+            document.body.appendChild(ring);
+            setTimeout(() => ring.remove(), 1000);
+            
+            // 创建冲击波
+            const shockwave = document.createElement('div');
+            shockwave.className = 'explosion-shockwave';
+            shockwave.style.left = x + 'px';
+            shockwave.style.top = y + 'px';
+            document.body.appendChild(shockwave);
+            setTimeout(() => shockwave.remove(), 1500);
+            
+            // 创建爆炸粒子
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'explosion-particle';
+                
+                // 随机颜色
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = `radial-gradient(circle, ${color}, transparent)`;
+                particle.style.boxShadow = `0 0 10px ${color}`;
+                
+                // 设置初始位置
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                // 随机大小
+                const size = 2 + Math.random() * 6;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                document.body.appendChild(particle);
+                
+                // 计算爆炸方向和距离
+                const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+                const velocity = 100 + Math.random() * 200;
+                const duration = 0.5 + Math.random() * 1;
+                
+                // 应用动画
+                particle.animate([
+                    {
+                        transform: 'translate(0, 0) scale(1)',
+                        opacity: 1
+                    },
+                    {
+                        transform: `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px) scale(0)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: duration * 1000,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                });
+                
+                // 移除粒子
+                setTimeout(() => particle.remove(), duration * 1000);
+            }
+            
+            // 创建额外的火花效果
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'magic-sparkle';
+                    sparkle.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
+                    sparkle.style.top = (y + (Math.random() - 0.5) * 100) + 'px';
+                    document.body.appendChild(sparkle);
+                    
+                    setTimeout(() => sparkle.remove(), 1000);
+                }, i * 30);
+            }
+        }
+
+        // 创建背景光斑
+        function createLightSpots() {
+            const lightSpotsContainer = document.getElementById('lightSpots');
+            const spotCount = 4;
+            
+            for (let i = 0; i < spotCount; i++) {
+                const spot = document.createElement('div');
+                spot.className = 'light-spot';
+                
+                spot.style.left = Math.random() * 80 + 10 + '%';
+                spot.style.top = Math.random() * 80 + 10 + '%';
+                spot.style.width = (100 + Math.random() * 200) + 'px';
+                spot.style.height = spot.style.width;
+                spot.style.animationDelay = Math.random() * 10 + 's';
+                spot.style.animationDuration = (15 + Math.random() * 10) + 's';
+                
+                lightSpotsContainer.appendChild(spot);
+            }
+        }
+
+        // 鼠标悬停波纹效果
+        function initRippleEffect() {
+            const container = document.querySelector('.container');
+            
+            container.addEventListener('mouseenter', (e) => {
+                const ripple = document.createElement('div');
+                ripple.className = 'ripple';
+                ripple.style.left = e.offsetX + 'px';
+                ripple.style.top = e.offsetY + 'px';
+                
+                container.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        }
+
+        // 声音反馈系统
+        function playSound(type) {
+            if (typeof AudioContext !== 'undefined') {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                if (type === 'hover') {
+                    // 悬停音效
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                } else if (type === 'click') {
+                    // 点击音效
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                }
+            }
+        }
+
+        // 页面加载动画序列
+        function initPageLoad() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const container = document.querySelector('.container');
+            
+            // 初始隐藏内容
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(30px) scale(0.9)';
+            
+            // 模拟加载过程
+            setTimeout(() => {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.remove();
+                    
+                    // 内容入场动画
+                    container.style.transition = 'all 1s cubic-bezier(0.23, 1, 0.32, 1)';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0) scale(1)';
+                    
+                    // 添加悬停音效
+                    container.addEventListener('mouseenter', () => playSound('hover'));
+                    document.querySelector('button').addEventListener('click', () => playSound('click'));
+                }, 1000);
+            }, 2000);
+        }
+        
+        // 创建动态光效系统
+        function createDynamicLights() {
+            const lightsContainer = document.getElementById('dynamicLights');
+            
+            // 创建光线扫描
+            for (let i = 0; i < 3; i++) {
+                const beam = document.createElement('div');
+                beam.className = 'light-beam';
+                beam.style.animationDelay = (i * 2.5) + 's';
+                beam.style.left = Math.random() * 100 + '%';
+                lightsContainer.appendChild(beam);
+            }
+            
+            // 创建脉冲光环
+            setInterval(() => {
+                const ring = document.createElement('div');
+                ring.className = 'pulse-ring';
+                ring.style.left = (Math.random() * 80 + 10) + '%';
+                ring.style.top = (Math.random() * 80 + 10) + '%';
+                lightsContainer.appendChild(ring);
+                
+                setTimeout(() => ring.remove(), 4000);
+            }, 2000);
+            
+            // 创建镭射光线
+            for (let i = 0; i < 2; i++) {
+                const laser = document.createElement('div');
+                laser.className = 'laser-light';
+                laser.style.top = (30 + i * 40) + '%';
+                laser.style.left = '50%';
+                laser.style.animationDelay = (i * 3) + 's';
+                lightsContainer.appendChild(laser);
+            }
+            
+            // 创建环境光
+            for (let i = 0; i < 2; i++) {
+                const ambient = document.createElement('div');
+                ambient.className = 'ambient-light';
+                ambient.style.left = (20 + i * 60) + '%';
+                ambient.style.top = (30 + Math.random() * 40) + '%';
+                ambient.style.animationDelay = (i * 5) + 's';
+                lightsContainer.appendChild(ambient);
+            }
+        }
+
+        // 页面加载完成后初始化所有效果
+
+        // 页面加载完成后初始化所有效果
+        window.addEventListener('load', () => {
+            createStars();
+            createParticles();
+            createLightSpots();
+            initCursorTrail();
+            createDynamicLights();
+            initPageLoad();
+            createFluidWaves();
+            createParallaxParticles();
+            enhanceMouseInteraction();
+            initPerformanceOptimization();
+            createColorFlowEffect();
+            optimizeResponsiveDetails();
+        });
+
+        // 创建流体波浪背景
+        function createFluidWaves() {
+            const wavesContainer = document.getElementById('fluidWaves');
+            const waveCount = 3;
+            
+            for (let i = 0; i < waveCount; i++) {
+                const wave = document.createElement('div');
+                wave.className = 'wave';
+                
+                // 随机位置和大小
+                wave.style.left = (Math.random() * 100) + '%';
+                wave.style.top = (Math.random() * 100) + '%';
+                wave.style.width = (150 + Math.random() * 100) + '%';
+                wave.style.height = wave.style.width;
+                wave.style.animationDelay = (Math.random() * 10) + 's';
+                wave.style.animationDuration = (15 + Math.random() * 15) + 's';
+                
+                wavesContainer.appendChild(wave);
+            }
+        }
+
+        // 创建3D视差粒子系统
+        function createParallaxParticles() {
+            const particlesContainer = document.getElementById('parallaxParticles');
+            const particleCount = 40;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = Math.random() > 0.8 ? 'parallax-particle special' : 'parallax-particle';
+                
+                // 随机位置
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // 随机大小（基于深度）
+                const depth = 0.5 + Math.random() * 0.5; // 0.5-1.0
+                const size = 3 + Math.random() * 6;
+                particle.style.width = (size * depth) + 'px';
+                particle.style.height = (size * depth) + 'px';
+                
+                // 设置3D深度
+                particle.style.transform = `translateZ(${(depth - 1) * 100}px)`;
+                
+                // 随机动画参数
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (8 + Math.random() * 10) + 's';
+                particle.style.opacity = 0.3 + Math.random() * 0.4;
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            // 鼠标移动时的视差效果
+            document.addEventListener('mousemove', (e) => {
+                const mouseX = e.clientX / window.innerWidth - 0.5;
+                const mouseY = e.clientY / window.innerHeight - 0.5;
+                
+                const particles = document.querySelectorAll('.parallax-particle');
+                particles.forEach((particle, index) => {
+                    const depth = 0.5 + (index % 10) * 0.05;
+                    const moveX = mouseX * 20 * depth;
+                    const moveY = mouseY * 20 * depth;
+                    
+                    particle.style.transform = `translate3d(${moveX}px, ${moveY}px, ${(depth - 1) * 100}px)`;
+                });
+            });
+        }
+
+        // 增强的鼠标交互效果
+        function enhanceMouseInteraction() {
+            const container = document.querySelector('.container');
+            const particlesContainer = document.getElementById('parallaxParticles');
+            
+            container.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // 创建跟随鼠标的粒子
+                if (Math.random() > 0.8) {
+                    const followParticle = document.createElement('div');
+                    followParticle.className = 'parallax-particle';
+                    followParticle.style.left = (x / rect.width * 100) + '%';
+                    followParticle.style.top = (y / rect.height * 100) + '%';
+                    followParticle.style.width = '4px';
+                    followParticle.style.height = '4px';
+                    followParticle.style.opacity = '0.6';
+                    followParticle.style.animation = 'parallaxFloat 4s ease-out forwards';
+                    
+                    particlesContainer.appendChild(followParticle);
+                    
+                    setTimeout(() => {
+                        followParticle.remove();
+                    }, 4000);
+                }
+            });
+            
+            // 鼠标进入容器时的波纹效果
+            container.addEventListener('mouseenter', () => {
+                const particles = document.querySelectorAll('.parallax-particle');
+                particles.forEach(particle => {
+                    particle.style.animationPlayState = 'paused';
+                    setTimeout(() => {
+                        particle.style.animationPlayState = 'running';
+                    }, 100);
+                });
+            });
+        }
+
+        // 性能优化函数
+        function initPerformanceOptimization() {
+            // 减少重绘和重排
+            const container = document.querySelector('.container');
+            container.style.willChange = 'transform, opacity';
+            
+            // 优化动画性能
+            const animatedElements = document.querySelectorAll('.rainbow-text, .parallax-particle, .wave');
+            animatedElements.forEach(el => {
+                el.style.willChange = 'transform, opacity';
+                el.style.backfaceVisibility = 'hidden';
+                el.style.transform = 'translate3d(0,0,0)';
+            });
+            
+            // 节流鼠标事件
+            let mouseMoveTimeout;
+            document.addEventListener('mousemove', (e) => {
+                if (!mouseMoveTimeout) {
+                    mouseMoveTimeout = setTimeout(() => {
+                        mouseMoveTimeout = null;
+                        // 这里可以添加需要节流的鼠标事件处理
+                    }, 16); // 约60fps
+                }
+            });
+            
+            // 优化粒子数量（根据设备性能）
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const particleElements = document.querySelectorAll('.parallax-particle');
+            if (isMobile && particleElements.length > 20) {
+                for (let i = 20; i < particleElements.length; i++) {
+                    particleElements[i].style.opacity = '0.1';
+                }
+            }
+            
+            // 监听页面可见性，暂停不可见页面的动画
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // 页面不可见时暂停所有动画
+                    animatedElements.forEach(el => {
+                        el.style.animationPlayState = 'paused';
+                    });
+                } else {
+                    // 页面可见时恢复动画
+                    animatedElements.forEach(el => {
+                        el.style.animationPlayState = 'running';
+                    });
+                }
+            });
+        }
+
+        // 创建色彩流动效果
+        function createColorFlowEffect() {
+            const colorFlow = document.getElementById('colorFlow');
+            if (!colorFlow) return;
+            
+            // 创建多个色彩层
+            for (let i = 0; i < 3; i++) {
+                const flowLayer = document.createElement('div');
+                flowLayer.className = 'color-flow';
+                flowLayer.style.animationDelay = (i * 6.66) + 's';
+                flowLayer.style.opacity = (0.2 + i * 0.1) + '';
+                flowLayer.style.filter = 'blur(' + (40 + i * 20) + 'px)';
+                flowLayer.style.mixBlendMode = i % 2 === 0 ? 'screen' : 'overlay';
+                
+                colorFlow.appendChild(flowLayer);
+            }
+        }
+
+        // 优化响应式细节
+        function optimizeResponsiveDetails() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const container = document.querySelector('.container');
+            
+            if (isMobile) {
+                // 移动设备优化
+                container.style.backdropFilter = 'blur(25px) saturate(180%) brightness(1.05)';
+                container.style.webkitBackdropFilter = 'blur(25px) saturate(180%) brightness(1.05)';
+                
+                // 减少粒子数量
+                const particles = document.querySelectorAll('.parallax-particle');
+                particles.forEach((particle, index) => {
+                    if (index > 15) {
+                        particle.style.display = 'none';
+                    }
+                });
+                
+                // 简化动画
+                const rainbowText = document.querySelector('.rainbow-text');
+                rainbowText.style.animation = 'rainbow 3s linear infinite, textGlow 2s ease-in-out infinite alternate';
+            }
+        }
+
+        // 初始化优化
+        window.addEventListener('load', () => {
+            optimizeResponsiveDetails();
+        });
+        </script>
+</body>
+</html>

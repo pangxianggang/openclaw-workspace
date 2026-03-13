@@ -1,0 +1,53 @@
+{
+  "id": "tx-mmofn2am-f34026b2",
+  "workspace": "C:\\Users\\Administrator\\Desktop\\火星文件扩展",
+  "path": "caihang.html",
+  "status": "staged",
+  "createdAt": "2026-03-13T05:04:40.031Z",
+  "beforeSnapshot": {
+    "path": "caihang.html",
+    "version": "sha256:31a5ea1272e812fc2c701fa10a4e68b30c0ea9dd9022b2706b8f42fa703220b2",
+    "content": "[stored in snapshot file]",
+    "timestamp": "2026-03-13T05:04:40.030Z"
+  },
+  "ops": [
+    {
+      "type": "replace",
+      "target": "蔡航的主页",
+      "replacement": "蔡航的个人空间"
+    }
+  ],
+  "dryRunResult": {
+    "success": false,
+    "transactionId": "tx-mmofn2am-f34026b2",
+    "path": "caihang.html",
+    "baseVersion": "sha256:31a5ea1272e812fc2c701fa10a4e68b30c0ea9dd9022b2706b8f42fa703220b2",
+    "ops": [
+      {
+        "success": false,
+        "matched": false,
+        "matchCount": 0,
+        "startLine": 0,
+        "endLine": 0,
+        "linesChanged": 0,
+        "error": "不支持的操作类型: replace"
+      }
+    ],
+    "totalLinesChanged": 0,
+    "riskLevel": "low",
+    "warnings": [
+      "操作 undefined 失败: 不支持的操作类型: replace"
+    ],
+    "diff": {
+      "path": "caihang.html",
+      "oldVersion": "sha256:31a5ea1272e812fc2c701fa10a4e68b30c0ea9dd9022b2706b8f42fa703220b2",
+      "hunks": [],
+      "unifiedDiff": "--- a/caihang.html\n+++ b/caihang.html",
+      "stats": {
+        "additions": 0,
+        "deletions": 0,
+        "changes": 0
+      }
+    }
+  }
+}

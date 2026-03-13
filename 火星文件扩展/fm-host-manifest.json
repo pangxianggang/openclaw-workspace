@@ -1,0 +1,9 @@
+{
+  "name": "fm.engine",
+  "description": "火星文件管理 Native Messaging Host",
+  "path": "fm-host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://*"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "火星文件管理 Bridge",
+  "version": "1.0.0",
+  "description": "让 CodeGPS Pro 网页访问本地火星文件管理系统",
+  "permissions": [
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://localhost:8765/*",
+    "file:///*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["file:///*", "http://localhost/*", "http://127.0.0.1/*"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js", "fm-integration.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

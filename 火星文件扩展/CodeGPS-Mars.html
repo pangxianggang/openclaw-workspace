@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeGPS Pro + 火星文件管理</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --bg-hover: #30363d;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-color: #58a6ff;
+            --success-color: #3fb950;
+            --danger-color: #f85149;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* 侧边栏 - 文件浏览器 */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .workspace-path {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .file-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .tree-item {
+            padding: 6px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            user-select: none;
+        }
+
+        .tree-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .tree-item.active {
+            background: rgba(88, 166, 255, 0.2);
+            color: var(--accent-color);
+        }
+
+        .tree-item.folder > .tree-icon {
+            transform: rotate(90deg);
+        }
+
+        .tree-item.folder.collapsed > .tree-icon {
+            transform: rotate(0deg);
+        }
+
+        .tree-item.folder.collapsed + .folder-children {
+            display: none;
+        }
+
+        .tree-icon {
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .file-icon {
+            color: var(--text-secondary);
+        }
+
+        .folder-icon {
+            color: #d29922;
+        }
+
+        .tree-children {
+            margin-left: 20px;
+        }
+
+        /* 主编辑区 */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .toolbar {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: var(--bg-tertiary);
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-color);
+        }
+
+        .btn.primary {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: #000;
+        }
+
+        .btn.primary:hover {
+            background: #79c0ff;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .current-file {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            background: var(--bg-secondary);
+        }
+
+        .current-file-name {
+            font-weight: 500;
+        }
+
+        .file-status {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .file-status.modified {
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--warning-color);
+        }
+
+        .file-status.saved {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--success-color);
+        }
+
+        .editor-container {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            padding: 4px 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+        }
+
+        /* 火星文件管理面板 */
+        .fm-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            min-width: 400px;
+            max-width: 600px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .fm-panel.active {
+            display: block;
+        }
+
+        .fm-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .fm-panel-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .fm-panel-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .fm-panel-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .diff-view {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            background: var(--bg-primary);
+            padding: 12px;
+            border-radius: 4px;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .diff-added {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--success-color);
+        }
+
+        .diff-removed {
+            background: rgba(248, 81, 73, 0.2);
+            color: var(--danger-color);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* 加载动画 */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-color: var(--success-color);
+        }
+
+        .toast.error {
+            border-color: var(--danger-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 欢迎页面 */
+        .welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .welcome h1 {
+            font-size: 28px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent-color), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            max-width: 500px;
+        }
+
+        .welcome-actions {
+            display: flex;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div>
+                    <div class="sidebar-title">🔴 火星文件管理</div>
+                    <div class="workspace-path" id="workspacePath">未选择工作区</div>
+                </div>
+            </div>
+            <div class="file-tree" id="fileTree">
+                <div class="tree-item" onclick="selectWorkspace()">
+                    <span>📁 选择工作区...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主编辑区 -->
+        <div class="main-area">
+            <div class="toolbar">
+                <button class="btn" onclick="selectWorkspace()">📂 打开</button>
+                <button class="btn primary" onclick="saveFile()" id="saveBtn" disabled>💾 保存</button>
+                <button class="btn" onclick="showDiff()" id="diffBtn" disabled>📊 对比</button>
+                <button class="btn" onclick="reloadFile()" id="reloadBtn" disabled>🔄 重载</button>
+                <div style="flex: 1"></div>
+                <div class="spinner" id="loadingSpinner" style="display: none;"></div>
+            </div>
+
+            <div class="current-file" id="currentFileBar" style="display: none;">
+                <span class="file-icon">📄</span>
+                <span class="current-file-name" id="currentFileName"></span>
+                <span class="file-status" id="fileStatus"></span>
+            </div>
+
+            <div class="editor-container">
+                <div class="welcome" id="welcomeScreen">
+                    <h1>CodeGPS Pro + 火星文件管理</h1>
+                    <p>
+                        集成了 Monaco 编辑器和火星文件管理系统，支持精确代码编辑、版本控制、事务回滚等功能。
+                        <br><br>
+                        点击"打开"选择工作区，然后开始编辑代码。
+                    </p>
+                    <div class="welcome-actions">
+                        <button class="btn primary" onclick="selectWorkspace()">📂 选择工作区</button>
+                        <button class="btn" onclick="loadDemo()">📝 加载示例</button>
+                    </div>
+                </div>
+                <div id="editorContainer" style="display: none; height: 100%;"></div>
+            </div>
+
+            <div class="status-bar">
+                <span id="statusPosition">Ln 1, Col 1</span>
+                <span id="statusLanguage">Plain Text</span>
+                <span id="statusVersion">-</span>
+                <span style="flex: 1"></span>
+                <span id="statusConnection">🔴 未连接火星文件</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div class="overlay" id="overlay"></div>
+    <div class="fm-panel" id="diffPanel">
+        <div class="fm-panel-header">
+            <span class="fm-panel-title">📊 修改对比</span>
+            <button class="fm-panel-close" onclick="closeDiffPanel()">×</button>
+        </div>
+        <div class="fm-panel-content">
+            <div class="diff-view" id="diffContent"></div>
+            <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
+                <button class="btn" onclick="closeDiffPanel()">取消</button>
+                <button class="btn primary" onclick="commitChanges()">✅ 提交</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 全局状态 ====================
+        let editor = null;
+        let currentFile = null;
+        let currentVersion = null;
+        let isModified = false;
+        let pendingTransaction = null;
+        let workspaceRoot = null;
+
+        // ==================== 火星文件管理 API ====================
+        const fmApi = {
+            async request(method, params) {
+                return new Promise((resolve, reject) => {
+                    // 通过扩展通信
+                    const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+                    const timeout = setTimeout(() => {
+                        reject(new Error('请求超时'));
+                    }, 30000);
+
+                    const messageHandler = (event) => {
+                        if (event.source !== window) return;
+                        if (event.data.type !== 'FM_PAGE_RESPONSE' || event.data.requestId !== requestId) return;
+
+                        clearTimeout(timeout);
+                        window.removeEventListener('message', messageHandler);
+
+                        if (event.data.data && event.data.data.success) {
+                            resolve(event.data.data.data);
+                        } else {
+                            reject(new Error(event.data.data?.error || '请求失败'));
+                        }
+                    };
+
+                    window.addEventListener('message', messageHandler);
+
+                    // 发送给扩展
+                    window.postMessage({
+                        type: 'FM_PAGE_REQUEST',
+                        requestId,
+                        payload: { method, params }
+                    }, '*');
+                });
+            },
+
+            async tree(path = '.', depth = 3) {
+                return this.request('tree', { path, depth });
+            },
+
+            async stat(path) {
+                return this.request('stat', { path });
+            },
+
+            async readRange(path, startLine = 0, endLine = 10000, context = 0) {
+                return this.request('readRange', { path, startLine, endLine, context });
+            },
+
+            async applyOps(path, baseVersion, ops, dryRun = true) {
+                return this.request('applyOps', { path, baseVersion, ops, dryRun });
+            },
+
+            async commit(transactionId) {
+                return this.request('commit', { transactionId });
+            },
+
+            async rollback(transactionId) {
+                return this.request('rollback', { transactionId });
+            },
+
+            async search(pattern, options = {}) {
+                return this.request('search', { pattern, ...options });
+            }
+        };
+
+        // ==================== 初始化编辑器 ====================
+        function initEditor() {
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+            require(['vs/editor/editor.main'], () => {
+                editor = monaco.editor.create(document.getElementById('editorContainer'), {
+                    value: '// 选择一个文件开始编辑\n// Select a file to start editing',
+                    language: 'markdown',
+                    theme: 'vs-dark',
+                    automaticLayout: true,
+                    fontSize: 14,
+                    minimap: { enabled: true },
+                    scrollBeyondLastLine: false,
+                    renderWhitespace: 'selection',
+                });
+
+                // 监听变化
+                editor.onDidChangeModelContent(() => {
+                    isModified = true;
+                    updateFileStatus();
+                });
+
+                // 监听光标位置
+                editor.onDidChangeCursorPosition((e) => {
+                    document.getElementById('statusPosition').textContent =
+                        `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
+                });
+
+                console.log('[Editor] Initialized');
+            });
+        }
+
+        // ==================== 文件操作 ====================
+        async function selectWorkspace() {
+            // 使用 File System Access API
+            if ('showDirectoryPicker' in window) {
+                try {
+                    const dirHandle = await window.showDirectoryPicker();
+                    workspaceRoot = dirHandle.name;
+                    document.getElementById('workspacePath').textContent = dirHandle.name;
+                    showToast('工作区已加载：' + dirHandle.name, 'success');
+                    await loadFileTree(dirHandle);
+                } catch (e) {
+                    if (e.name !== 'AbortError') {
+                        showToast('无法访问目录：' + e.message, 'error');
+                    }
+                }
+            } else {
+                // 降级方案：使用输入框
+                const path = prompt('请输入工作区路径:');
+                if (path) {
+                    workspaceRoot = path;
+                    document.getElementById('workspacePath').textContent = path;
+                    await loadFileTreeFromPath(path);
+                }
+            }
+        }
+
+        async function loadFileTree(dirHandle) {
+            const treeEl = document.getElementById('fileTree');
+            treeEl.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                // 尝试使用火星文件管理的 tree 命令
+                const tree = await fmApi.tree('.', 4);
+                renderFileTree(treeEl, tree);
+                updateConnectionStatus(true);
+            } catch (e) {
+                console.warn('FM API 不可用，使用浏览器 API:', e);
+                // 降级：使用浏览器 API 遍历
+                const tree = await buildFileTree(dirHandle, 0);
+                renderFileTree(treeEl, tree);
+                updateConnectionStatus(false);
+            }
+        }
+
+        async function buildFileTree(dirHandle, depth, maxDepth = 4) {
+            if (depth > maxDepth) return null;
+
+            const result = { name: dirHandle.name, type: 'directory', children: [] };
+
+            try {
+                for await (const entry of dirHandle.values()) {
+                    if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+
+                    if (entry.kind === 'file') {
+                        result.children.push({
+                            name: entry.name,
+                            type: 'file',
+                            handle: entry
+                        });
+                    } else if (entry.kind === 'directory') {
+                        const subTree = await buildFileTree(entry, depth + 1, maxDepth);
+                        if (subTree) {
+                            subTree.handle = entry;
+                            result.children.push(subTree);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('访问目录失败:', e);
+            }
+
+            return result;
+        }
+
+        function renderFileTree(container, tree, level = 0) {
+            if (!tree || !tree.children) return;
+
+            container.innerHTML = '';
+
+            tree.children.forEach((item, index) => {
+                const isFolder = item.type === 'directory' || item.children;
+
+                const itemEl = document.createElement('div');
+                itemEl.className = `tree-item ${isFolder ? 'folder' : 'file'}`;
+                itemEl.style.marginLeft = `${level * 16}px`;
+
+                const icon = isFolder ? '📁' : getFileIcon(item.name);
+                itemEl.innerHTML = `
+                    <span class="tree-icon">${isFolder ? '▶' : ''}</span>
+                    <span class="${isFolder ? 'folder-icon' : 'file-icon'}">${icon}</span>
+                    <span>${item.name}</span>
+                `;
+
+                itemEl.onclick = (e) => {
+                    e.stopPropagation();
+
+                    if (isFolder) {
+                        itemEl.classList.toggle('collapsed');
+                        const childrenEl = itemEl.nextElementSibling;
+                        if (childrenEl && childrenEl.classList.contains('folder-children')) {
+                            childrenEl.style.display = childrenEl.style.display === 'none' ? 'block' : 'none';
+                        }
+                    } else {
+                        document.querySelectorAll('.tree-item.active').forEach(el => el.classList.remove('active'));
+                        itemEl.classList.add('active');
+                        openFile(item);
+                    }
+                };
+
+                container.appendChild(itemEl);
+
+                if (isFolder && item.children) {
+                    const childrenEl = document.createElement('div');
+                    childrenEl.className = 'tree-children folder-children';
+                    childrenEl.style.display = 'none';
+                    renderFileTree(childrenEl, { children: item.children }, level + 1);
+                    container.appendChild(childrenEl);
+                }
+            });
+        }
+
+        function getFileIcon(name) {
+            const ext = name.split('.').pop().toLowerCase();
+            const icons = {
+                'js': '📜', 'ts': '📘', 'jsx': '⚛️', 'tsx': '⚛️',
+                'py': '🐍', 'java': '☕', 'c': '©️', 'cpp': '©️', 'cs': '♯️',
+                'go': '🔷', 'rs': '🦀', 'rb': '💎', 'php': '🐘',
+                'html': '🌐', 'css': '🎨', 'scss': '🎨', 'less': '🎨',
+                'json': '📋', 'yaml': '📋', 'yml': '📋', 'xml': '📋',
+                'md': '📝', 'txt': '📄', 'log': '📜',
+                'sh': '⚙️', 'bat': '⚙️', 'ps1': '⚙️'
+            };
+            return icons[ext] || '📄';
+        }
+
+        async function openFile(file) {
+            showLoading(true);
+
+            try {
+                let content, version;
+
+                // 尝试使用火星文件管理读取
+                try {
+                    const result = await fmApi.readRange(file.name || file.path, 0, 100000, 0);
+                    content = result.content;
+                    version = result.version;
+                    updateConnectionStatus(true);
+                } catch (e) {
+                    // 降级：使用浏览器 File API
+                    if (file.handle) {
+                        const fileHandle = await file.handle.getFile();
+                        content = await fileHandle.text();
+                        version = null;
+                    } else {
+                        throw new Error('无法读取文件');
+                    }
+                }
+
+                currentFile = file;
+                currentVersion = version;
+                isModified = false;
+
+                editor.setValue(content);
+                monaco.editor.setModelLanguage(editor.getModel(), getLanguage(file.name));
+
+                document.getElementById('welcomeScreen').style.display = 'none';
+                document.getElementById('editorContainer').style.display = 'block';
+                document.getElementById('currentFileBar').style.display = 'flex';
+                document.getElementById('currentFileName').textContent = file.name || file.path;
+                document.getElementById('reloadBtn').disabled = false;
+
+                updateFileStatus();
+                showToast('文件已加载', 'success');
+            } catch (e) {
+                showToast('无法打开文件：' + e.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function saveFile() {
+            if (!currentFile) return;
+
+            showLoading(true);
+
+            try {
+                const content = editor.getValue();
+
+                // 使用火星文件管理保存（如果有版本信息）
+                if (currentVersion && fmApi) {
+                    const ops = [{
+                        id: 'op1',
+                        type: 'replace_range',
+                        target: { type: 'range', startLine: 0, endLine: 100000 },
+                        newText: content
+                    }];
+
+                    const result = await fmApi.applyOps(currentFile.name || currentFile.path, currentVersion, ops, false);
+
+                    if (result.transactionId) {
+                        pendingTransaction = result.transactionId;
+                        await fmApi.commit(result.transactionId);
+                        currentVersion = result.newVersion;
+                    }
+
+                    showToast('✅ 文件已保存（火星文件管理）', 'success');
+                } else {
+                    // 降级：直接保存（需要扩展支持）
+                    showToast('⚠️ 需要扩展支持才能保存', 'error');
+                }
+
+                isModified = false;
+                updateFileStatus();
+            } catch (e) {
+                showToast('保存失败：' + e.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function showDiff() {
+            if (!currentFile || !isModified) return;
+
+            try {
+                const originalResult = await fmApi.readRange(currentFile.name || currentFile.path, 0, 100000, 0);
+                const originalContent = originalResult.content;
+                const currentContent = editor.getValue();
+
+                const diff = computeDiff(originalContent, currentContent);
+                document.getElementById('diffContent').textContent = diff;
+
+                document.getElementById('overlay').classList.add('active');
+                document.getElementById('diffPanel').classList.add('active');
+                document.getElementById('diffBtn').disabled = false;
+            } catch (e) {
+                showToast('无法获取差异：' + e.message, 'error');
+            }
+        }
+
+        function closeDiffPanel() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('diffPanel').classList.remove('active');
+        }
+
+        async function commitChanges() {
+            if (pendingTransaction) {
+                try {
+                    await fmApi.commit(pendingTransaction);
+                    showToast('✅ 修改已提交', 'success');
+                    closeDiffPanel();
+                    pendingTransaction = null;
+                } catch (e) {
+                    showToast('提交失败：' + e.message, 'error');
+                }
+            } else {
+                await saveFile();
+                closeDiffPanel();
+            }
+        }
+
+        async function reloadFile() {
+            if (!currentFile) return;
+
+            if (isModified && !confirm('有未保存的修改，确定要重载吗？')) return;
+
+            await openFile(currentFile);
+        }
+
+        function updateFileStatus() {
+            const statusEl = document.getElementById('fileStatus');
+            const saveBtn = document.getElementById('saveBtn');
+            const diffBtn = document.getElementById('diffBtn');
+
+            if (isModified) {
+                statusEl.textContent = '已修改';
+                statusEl.className = 'file-status modified';
+                saveBtn.disabled = false;
+                diffBtn.disabled = false;
+            } else {
+                statusEl.textContent = currentVersion ? '已同步' : '已保存';
+                statusEl.className = 'file-status saved';
+                saveBtn.disabled = !currentVersion;
+                diffBtn.disabled = true;
+            }
+        }
+
+        function getLanguage(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const langs = {
+                'js': 'javascript', 'ts': 'typescript', 'jsx': 'javascript', 'tsx': 'typescript',
+                'py': 'python', 'java': 'java', 'c': 'c', 'cpp': 'cpp', 'cs': 'csharp',
+                'go': 'go', 'rs': 'rust', 'rb': 'ruby', 'php': 'php',
+                'html': 'html', 'css': 'css', 'scss': 'scss', 'less': 'less',
+                'json': 'json', 'yaml': 'yaml', 'yml': 'yaml', 'xml': 'xml',
+                'md': 'markdown', 'txt': 'plaintext', 'sh': 'shell'
+            };
+            return langs[ext] || 'plaintext';
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('statusConnection');
+            statusEl.textContent = connected ? '🟢 火星文件已连接' : '🔴 未连接火星文件';
+            statusEl.style.color = connected ? 'var(--success-color)' : 'var(--danger-color)';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // 简单的 diff 算法
+        function computeDiff(original, modified) {
+            const origLines = original.split('\n');
+            const modLines = modified.split('\n');
+            const result = [];
+
+            let i = 0, j = 0;
+            while (i < origLines.length || j < modLines.length) {
+                if (i >= origLines.length) {
+                    result.push(`+ ${modLines[j]}`);
+                    j++;
+                } else if (j >= modLines.length) {
+                    result.push(`- ${origLines[i]}`);
+                    i++;
+                } else if (origLines[i] === modLines[j]) {
+                    result.push(`  ${origLines[i]}`);
+                    i++;
+                    j++;
+                } else {
+                    result.push(`- ${origLines[i]}`);
+                    result.push(`+ ${modLines[j]}`);
+                    i++;
+                    j++;
+                }
+            }
+
+            return result.join('\n');
+        }
+
+        function loadDemo() {
+            const demoCode = `// CodeGPS Pro + 火星文件管理
+// 演示代码
+
+class FileManager {
+    constructor(workspace) {
+        this.workspace = workspace;
+        this.files = new Map();
+    }
+
+    async openFile(path) {
+        // 使用火星文件管理读取
+        const result = await fmApi.readRange(path, 0, 1000);
+        return result.content;
+    }
+
+    async saveFile(path, content) {
+        // 精确编辑，事务提交
+        const ops = [{
+            type: 'replace_range',
+            target: { startLine: 0, endLine: 1000 },
+            newText: content
+        }];
+        return await fmApi.applyOps(path, this.version, ops);
+    }
+}
+
+// 开始使用
+const fm = new FileManager('./project');
+console.log('火星文件管理已就绪！');
+`;
+
+            editor.setValue(demoCode);
+            monaco.editor.setModelLanguage(editor.getModel(), 'javascript');
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('editorContainer').style.display = 'block';
+        }
+
+        // ==================== 初始化 ====================
+        window.addEventListener('load', () => {
+            initEditor();
+            console.log('[App] Loaded');
+        });
+    </script>
+</body>
+</html>

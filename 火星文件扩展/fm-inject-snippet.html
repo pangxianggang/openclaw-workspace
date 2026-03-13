@@ -1,0 +1,172 @@
+<!-- 火星文件管理集成 - 直接添加到 CodeGPS-Pro.html -->
+<!-- 将此脚本添加到 </body> 标签之前 -->
+
+<script>
+/**
+ * 火星文件管理集成模块
+ * 为 CodeGPS Pro 添加火星文件管理能力
+ */
+(function() {
+    if (window.fmIntegrationLoaded) {
+        console.log('[FM] 已加载，跳过重复初始化');
+        return;
+    }
+    window.fmIntegrationLoaded = true;
+
+    console.log('[FM] 🚀 火星文件管理集成已加载');
+
+    // 火星文件管理 API 调用
+    window.fmApi = {
+        async request(method, params) {
+            return new Promise((resolve, reject) => {
+                const requestId = 'fm_req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                const timeout = setTimeout(() => {
+                    reject(new Error('火星文件管理请求超时 (60 秒)'));
+                }, 60000);
+
+                const messageHandler = (event) => {
+                    if (event.source !== window) return;
+                    if (event.data.type !== 'FM_PAGE_RESPONSE' || event.data.requestId !== requestId) return;
+
+                    clearTimeout(timeout);
+                    window.removeEventListener('message', messageHandler);
+
+                    if (event.data.data && event.data.data.success) {
+                        resolve(event.data.data.data);
+                    } else {
+                        reject(new Error(event.data.data?.error || '请求失败'));
+                    }
+                };
+
+                window.addEventListener('message', messageHandler);
+
+                window.postMessage({
+                    type: 'FM_PAGE_REQUEST',
+                    requestId,
+                    payload: { method, params }
+                }, '*');
+
+                console.log('[FM] 发送请求:', method, params);
+            });
+        },
+
+        async tree(path = '.', depth = 3) {
+            return this.request('tree', { path, depth });
+        },
+
+        async stat(path) {
+            return this.request('stat', { path });
+        },
+
+        async readRange(path, startLine = 0, endLine = 10000, context = 0) {
+            return this.request('readRange', { path, startLine, endLine, context });
+        },
+
+        async read(path) {
+            return this.readRange(path, 0, 10000, 0);
+        },
+
+        async search(pattern, options = {}) {
+            return this.request('search', { pattern, ...options });
+        },
+
+        async outline(path) {
+            return this.request('outline', { path });
+        },
+
+        async symbols(path) {
+            return this.request('symbols', { path });
+        },
+
+        async applyOps(path, baseVersion, ops, dryRun = true) {
+            return this.request('applyOps', { path, baseVersion, ops, dryRun });
+        },
+
+        async commit(transactionId) {
+            return this.request('commit', { transactionId });
+        },
+
+        async rollback(transactionId) {
+            return this.request('rollback', { transactionId });
+        },
+
+        async createFile(path, content) {
+            return this.request('createFile', { path, content });
+        },
+
+        async deleteFile(path) {
+            return this.request('deleteFile', { path });
+        }
+    };
+
+    // 火星文件管理工具描述（用于 AI prompt）
+    window.FM_TOOLS_DESC = `
+
+🔴 **火星文件管理系统** - 外科手术式精确文件编辑
+
+**可用工具**：
+- fmApi.tree(path, depth) - 查看目录树
+- fmApi.stat(path) - 获取文件信息（含 hash 版本）
+- fmApi.readRange(path, start, end) - 读取文件指定范围
+- fmApi.search(pattern, options) - 跨文件搜索
+- fmApi.symbols(path) - 获取代码符号（函数/类）
+- fmApi.outline(path) - 获取 Markdown 大纲
+- fmApi.applyOps(path, version, ops, dryRun) - 应用编辑操作
+- fmApi.commit(transactionId) - 提交事务
+- fmApi.rollback(transactionId) - 回滚事务
+
+**编辑流程**：
+1. 读取文件获取版本：await fmApi.stat(path)
+2. 定义操作：ops = [{type:'replace_range', target:{startLine:10,endLine:20}, newText:'...'}]
+3. 预览：await fmApi.applyOps(path, version, ops, true)
+4. 提交：await fmApi.commit(transactionId)
+`;
+
+    // 扩展 SmartCodeEngine 的 generatePrompt 方法
+    function extendSmartCodeEngine() {
+        if (!window.SmartCodeEngine) {
+            console.log('[FM] SmartCodeEngine 未找到，稍后重试...');
+            setTimeout(extendSmartCodeEngine, 500);
+            return;
+        }
+
+        const originalGeneratePrompt = window.SmartCodeEngine.prototype.generatePrompt;
+
+        window.SmartCodeEngine.prototype.generatePrompt = function(userMessage, history, contextInfo) {
+            const messages = originalGeneratePrompt.call(this, userMessage, history, contextInfo);
+
+            // 在 system message 中添加火星文件管理工具说明
+            const systemMessage = messages.find(m => m.role === 'system');
+            if (systemMessage) {
+                systemMessage.content += window.FM_TOOLS_DESC;
+            }
+
+            return messages;
+        };
+
+        console.log('[FM] ✅ 已扩展 AI - 现在 AI 知道如何使用火星文件管理工具');
+    }
+
+    // 启动扩展
+    extendSmartCodeEngine();
+
+    // 添加状态指示器
+    function addStatusIndicator() {
+        // 检查服务是否可用
+        fetch('http://127.0.0.1:8765/rpc', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({method:'tree', params:{path:'.', depth:0}})
+        }).then(() => {
+            console.log('[FM] ✅ 火星文件服务已连接');
+            window.fmServiceConnected = true;
+        }).catch(() => {
+            console.log('[FM] ⚠️ 火星文件服务未启动，请运行"启动火星文件服务.bat"');
+            window.fmServiceConnected = false;
+        });
+    }
+
+    addStatusIndicator();
+
+})();
+</script>

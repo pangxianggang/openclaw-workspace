@@ -1,0 +1,9 @@
+Windows Registry Editor Version 5.00
+
+; 火星文件管理 Native Messaging Host - Chrome
+[HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\fm.engine]
+@="C:\\Users\\Administrator\\Desktop\\火星文件扩展\\fm-host-manifest.json"
+
+; 火星文件管理 Native Messaging Host - Edge
+[HKEY_CURRENT_USER\Software\Microsoft\Edge\NativeMessagingHosts\fm.engine]
+@="C:\\Users\\Administrator\\Desktop\\火星文件扩展\\fm-host-manifest.json"
