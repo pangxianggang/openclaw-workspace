@@ -1,358 +1,150 @@
-<p align="center">
-  <h1 align="center">🦞 OpenClaw AI Agent Workspace</h1>
-  <p align="center">
-    <strong>Next-Generation AI Agent Development Environment</strong>
-  </p>
-</p>
+# OpenClaw Workspace - 火星文件管理与智能编程平台
 
-<p align="center">
-  <a href="https://github.com/pangxianggang/openclaw-workspace/stargazers">
-    <img src="https://img.shields.io/github/stars/pangxianggang/openclaw-workspace?style=for-the-badge&logo=github&color=ffd700" alt="Stars">
-  </a>
-  <a href="https://github.com/pangxianggang/openclaw-workspace/network/members">
-    <img src="https://img.shields.io/github/forks/pangxianggang/openclaw-workspace?style=for-the-badge&logo=github&color=blue" alt="Forks">
-  </a>
-  <a href="https://github.com/pangxianggang/openclaw-workspace/issues">
-    <img src="https://img.shields.io/github/issues/pangxianggang/openclaw-workspace?style=for-the-badge&logo=github&color=ff6b6b" alt="Issues">
-  </a>
-  <a href="https://github.com/pangxianggang/openclaw-workspace/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/pangxianggang/openclaw-workspace?style=for-the-badge&logo=github&color=4ecdc4" alt="License">
-  </a>
-  <br>
-  <a href="https://github.com/pangxianggang">
-    <img src="https://img.shields.io/badge/Author-庞祥刚-blue?style=for-the-badge&logo=github" alt="Author">
-  </a>
-  <a href="https://python.org">
-    <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  </a>
-  <a href="https://github.com/openclaw/openclaw">
-    <img src="https://img.shields.io/badge/OpenClaw-3.2-2ea44f?style=for-the-badge&logo=github" alt="OpenClaw">
-  </a>
-</p>
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Author](https://img.shields.io/badge/Author-庞祥刚-green.svg)](https://github.com/pangxianggang)
 
----
+> Chrome 扩展 (Manifest V3) + Node.js 命令行 AI 编程平台，集成多种 AI 模型与本地文件管理系统。
 
-## 🌊 项目概览
+## 项目简介
 
-> **OpenClaw AI Agent Workspace** 是一个功能完整的 AI 智能体开发环境，集成了多层记忆系统、技能模块、自动化工作流和 15+ AI 模型支持。
+本项目是一个面向开发者的本地化智能编程工具集，包含两个核心组件：
 
-<div align="center">
+1. **火星文件管理 Bridge** - Chrome 扩展（Manifest V3），用于将 CodeGPS Pro 网页与本地火星文件管理 HTTP 服务连接
+2. **火星编程平台** - Node.js 命令行 AI 编程平台，集成 DashScope、ZhipuAI、DeepSeek、Moonshot 等多种 AI 模型，提供智能代码分析、修复和文件管理功能
 
-| 🎯 核心能力 | 🛠️ 技术栈 | 🚀 特色功能 |
-|------------|----------|------------|
-| 多层记忆系统 | FastAPI + Qdrant + Ollama | 事务支持 |
-| 15+ AI 模型 | Python 3.14 + TypeScript | 操作日志 |
-| 技能生态系统 | Docker + Git + Linux | 流式处理 |
-| 自动化工作流 | PostgreSQL + Redis | 批量操作 |
+## 功能特性
 
-</div>
+### Chrome 扩展 (火星文件管理 Bridge)
+- 通过 Content Script 注入 CodeGPS Pro 页面
+- 与本地 HTTP Bridge 服务 (localhost:8765) 通信
+- 支持 file://、localhost、127.0.0.1 等多种页面匹配
+- Background Service Worker 后台运行
 
----
+### 命令行编程平台 (mars-platform.js)
+- 多 AI 模型支持：DashScope (通义千问)、ZhipuAI (智谱)、DeepSeek、Moonshot
+- 交互式命令行编程体验
+- 文件读写、目录浏览等本地文件管理操作
+- 聊天历史记录与日志轮转
+- MCP (Model Context Protocol) 服务器管理
 
-## ✨ 核心特性
+### 智能代码修复 (code-fixer.js)
+- AI 驱动的代码问题分析
+- 自动生成精确修复方案
+- 事务式修复应用，支持回滚
 
-### 🧠 记忆系统 (Memory Bank)
+### MCP 管理器 (mcp-manager.js)
+- 动态添加、删除、启用、禁用 MCP 服务器
+- 服务器连接测试
+- 配置文件持久化管理
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Ollama        │     │   Qdrant        │     │  Memory Bank    │
-│  端口 11434     │◄───►│  端口 6333      │◄───►│  端口 8100      │
-│  LLM + 嵌入     │     │  向量数据库      │     │  FastAPI 服务    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-```
-
-| 功能 | 说明 | 状态 |
-|------|------|------|
-| 候选经验池 | 新经验默认 candidate，第 3 次正反馈后转正 | ✅ |
-| 多信号置信度 | 反馈驱动置信度：0.50 → 0.64 → 0.92 | ✅ |
-| 成功率排序 | 按采纳成功率排序，支持 include_candidates | ✅ |
-
-### 🔧 火星文件管理 V2
-
-| 功能 | V1 | V2 | 提升 |
-|------|----|----|----|
-| 事务支持 | ❌ | ✅ | 🔥 版本校验/回滚 |
-| 操作日志 | ❌ | ✅ | ⭐ 完整审计追踪 |
-| 大文件流式 | ❌ | ✅ | ⭐ 1.8M 行/秒 |
-| 批量操作 | ❌ | ✅ | ⭐ 多线程加速 |
-| 异步支持 | ❌ | ✅ | ⭐ async/await |
-
-**性能指标**:
-```
-✅ 流式读取：1,544,920 行/秒
-✅ 批量创建：2,491 文件/秒
-✅ 批量编辑：500 文件/秒
-✅ 异步并发：15 文件/<0.01 秒
-```
-
-### 🤖 AI 模型支持 (15+)
-
-#### 阿里云 DashScope (5 个)
-| 模型 | 上下文 | 特点 | 推荐场景 |
-|------|--------|------|----------|
-| **Qwen3.5-Plus** ⭐ | 1M | 主力模型 | 通用对话 |
-| **Qwen3-Max** 🚀 | 262K | 最强版本 | 复杂任务 |
-| **Qwen3-Coder-Next** 💻 | 262K | 代码优化 | 编程任务 |
-| **Qwen3-Coder-Plus** 💻 | 1M | 代码增强 | 大型项目 |
-| **MiniMax-M2.5** 🎯 | 196K | 多模态 | 图文处理 |
-
-#### 智普 AI (4 个)
-| 模型 | 上下文 | 特点 |
-|------|--------|------|
-| **GLM-5** 🧠 | 202K | 通用主力 |
-| **GLM-4.7** 📊 | 202K | 平衡版本 |
-| **GLM-4-Air** ⚖️ | 202K | 性能平衡 |
-| **GLM-4-Flash** ⚡ | 202K | 最快响应 |
-
-#### 其他模型 (6 个)
-| 模型 | 提供商 | 特点 |
-|------|--------|------|
-| **Kimi-K2.5** 🌙 | Moonshot | 长文本专家 |
-| **DeepSeek-Chat** 💬 | DeepSeek | 对话优化 |
-| **DeepSeek-Coder** 💻 | DeepSeek | 编程专用 |
-| **DeepSeek-V3** 🚀 | DeepSeek | 最新版本 |
-| **Pony-Alpha-2** 🐴 | 智普 | 代码专用 |
-
----
-
-## 🏗️ 系统架构
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Client Layer                              │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
-│  │  OpenClaw   │  │  AutoClaw   │  │   Web UI    │             │
-│  │  Port:18789 │  │  Port:18790 │  │   Browser   │             │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘             │
-└─────────┼────────────────┼────────────────┼────────────────────┘
-          │                │                │
-          └────────────────┼────────────────┘
-                           │
-┌──────────────────────────▼────────────────────────────────────┐
-│                      Gateway Layer                             │
-│  ┌─────────────────────────────────────────────────────────┐  │
-│  │              OpenClaw Gateway (Main)                     │  │
-│  │         Token: 963cfdcebfa715af5e0d08e5d58c55f247...    │  │
-│  └─────────────────────────────────────────────────────────┘  │
-└──────────────────────────┬────────────────────────────────────┘
-                           │
-          ┌────────────────┼────────────────┐
-          │                │                │
-┌─────────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐
-│  Mars File     │ │   Memory    │ │   Skills    │
-│  Manager V2    │ │    Bank     │ │   System    │
-│  - Transaction │ │  - FastAPI  │ │  - 50+      │
-│  - Logging     │ │  - Qdrant   │ │    Skills   │
-│  - Streaming   │ │  - Ollama   │ │             │
-└────────────────┘ └─────────────┘ └─────────────┘
-```
-
----
-
-## 📁 项目结构
+## 项目结构
 
 ```
 openclaw-workspace/
-├── .openclaw/                    # OpenClaw 配置
-│   ├── openclaw.json            # 主配置文件
-│   └── workspace/               # 工作区文件
-├── .openclaw-autoclaw/          # AutoClaw 独立配置
-│   ├── openclaw.json            # AutoClaw 配置
-│   └── sessions/                # 独立会话存储
-├── memory/                      # 记忆系统
-│   ├── YYYY-MM-DD.md           # 每日记忆
-│   └── MEMORY.md               # 长期记忆
-├── skills/                      # 技能模块
-│   ├── fm-engine/              # 火星文件管理
-│   ├── autoglm-*               # AutoGLM 系列
-│   └── ...                     # 50+ 技能
-├── AGENTS.md                    # AI 助手配置
-├── SOUL.md                      # AI 人格定义
-├── USER.md                      # 用户信息
-├── TOOLS.md                     # 工具文档
-├── HEARTBEAT.md                 # 心跳机制
-├── IDENTITY.md                  # 身份定义
+├── 火星文件扩展/
+│   ├── manifest.json            # Chrome 扩展配置 (Manifest V3)
+│   ├── background.js            # Service Worker 后台脚本
+│   ├── content.js               # Content Script 注入脚本
+│   ├── injected.js              # 页面注入脚本
+│   ├── fm-integration.js        # 文件管理集成模块
+│   ├── fm-http-bridge.js        # HTTP Bridge 服务
+│   ├── fm-host-wrapper.js       # Native Messaging Host 包装器
+│   ├── mars-platform.js         # 命令行 AI 编程平台 (主程序)
+│   ├── code-fixer.js            # 智能代码修复模块
+│   ├── mcp-manager.js           # MCP 服务器管理器
+│   ├── system-prompt.js         # AI 系统提示词
+│   ├── config.example.json      # 配置文件模板
+│   ├── CodeGPS-Mars.html        # CodeGPS 集成页面
+│   ├── *.bat                    # Windows 启动/安装脚本
+│   └── *.md                     # 使用文档
+├── .github/
+│   ├── ISSUE_TEMPLATE/          # Issue 模板
+│   └── pull_request_template.md # PR 模板
+├── tests/                       # 单元测试
+├── CONTRIBUTING.md              # 贡献指南
+├── LICENSE                      # MIT 许可证
 └── README.md                    # 本文件
 ```
 
----
+## 快速开始
 
-## 🚀 快速开始
+### 环境要求
 
-### 1️⃣ 环境准备
+- Node.js >= 18
+- Chrome 浏览器（用于安装扩展）
+- Windows 操作系统（部分 .bat 脚本仅支持 Windows）
+
+### 安装步骤
+
+1. 克隆仓库
 
 ```bash
-# 安装依赖
-pip install fastapi uvicorn qdrant-client ollama
-
-# 启动服务
-docker start qdrant
-docker start ollama
-python main.py  # Memory Bank
+git clone https://github.com/pangxianggang/openclaw-workspace.git
+cd openclaw-workspace
 ```
 
-### 2️⃣ 使用火星文件管理
+2. 配置 AI 服务
 
-```python
-from fm_engine_v2 import FileEngineV2
-
-# 初始化引擎
-engine = FileEngineV2(
-    r"C:\Users\Administrator\Desktop",
-    log_file="ops.log"
-)
-
-# 启用事务
-engine.txn._check_all_files = True
-
-# 使用事务
-with engine.txn.transaction():
-    engine.edit("file.txt", line=1, content="新内容\n")
+```bash
+cd 火星文件扩展
+cp config.example.json config.json
 ```
 
-### 3️⃣ 使用记忆系统
+编辑 `config.json`，填入你的 API Key 和相关配置：
 
-```python
-import requests
-
-# 保存经验
-requests.post('http://localhost:8100/experience/write', json={
-    'topic': '主题',
-    'lesson': '经验内容',
-    'type': 'lesson',
-    'tags': ['标签']
-})
-
-# 搜索记忆
-requests.post('http://localhost:8100/memory/search', json={
-    'query': '搜索内容',
-    'limit': 5
-})
+```json
+{
+  "apiKey": "your-api-key-here",
+  "apiProvider": "dashscope",
+  "apiModel": "qwen3.5-plus",
+  "apiBaseUrl": "https://coding.dashscope.aliyuncs.com/v1",
+  "workspace": "C:\\Users\\YourName\\Desktop",
+  "fmCliPath": "C:\\Users\\YourName\\Desktop\\火星文件\\dist\\cli\\index.js"
+}
 ```
 
-### 4️⃣ 切换 AI 模型
+3. 启动命令行编程平台
 
-```python
-# OpenClaw (默认 Qwen3.5-Plus)
-# AutoClaw (默认 Pony-Alpha-2)
-
-# 在对话中直接指定：
-"切换到 Qwen3-Max 模型"
-"使用 glm-5 帮我写代码"
+```bash
+node mars-platform.js
 ```
 
----
+4. 安装 Chrome 扩展
 
-## 📊 端口配置
+- 打开 Chrome，访问 `chrome://extensions/`
+- 启用「开发者模式」
+- 点击「加载已解压的扩展程序」，选择 `火星文件扩展/` 目录
 
-| 服务 | 端口 | 状态 | 说明 |
-|------|------|------|------|
-| OpenClaw Gateway | 18789 | ✅ | 主力助手 |
-| AutoClaw Gateway | 18790 | ✅ | 智普客户端 |
-| Memory Bank API | 8100 | ✅ | 记忆服务 |
-| Qdrant DB | 6333 | ✅ | 向量数据库 |
-| Ollama | 11434 | ✅ | 本地 LLM |
+### 使用 MCP 管理器
 
----
-
-## 🎯 使用场景
-
-### 日常对话
-```
-"你好阿里" → 使用 Qwen3.5-Plus
+```bash
+node mcp-manager.js list              # 列出所有 MCP 服务器
+node mcp-manager.js add <名称> <命令>  # 添加服务器
+node mcp-manager.js remove <名称>     # 删除服务器
+node mcp-manager.js test <名称>       # 测试连接
 ```
 
-### 编程任务
-```
-"用 Qwen3-Coder-Plus 帮我写个 FastAPI 接口"
-```
+## 支持的 AI 模型
 
-### 文件操作
-```
-"用火星文件管理系统在桌面创建测试文件"
-```
+| 提供商 | 模型示例 | 说明 |
+|--------|---------|------|
+| DashScope | qwen3.5-plus | 阿里云通义千问 |
+| ZhipuAI | glm-4 | 智谱清言 |
+| DeepSeek | deepseek-chat | DeepSeek |
+| Moonshot | moonshot-v1 | Moonshot AI |
 
-### 记忆查询
-```
-"搜索关于 Python API 的记忆"
-```
+## 语言组成
 
-### 批量操作
-```
-"批量给所有 Python 文件添加头部注释"
-```
+- JavaScript: 60.3%
+- HTML: 35.3%
+- Batchfile: 3.8%
 
----
+## 许可证
 
-## 🏆 成就与统计
+本项目基于 [MIT 许可证](LICENSE) 开源。
 
-### 已完成
-- ✅ AutoClaw 连接问题修复
-- ✅ 火星文件管理 V2 发布
-- ✅ 记忆大脑系统上线
-- ✅ 15 个 AI 模型配置
-- ✅ 会话隔离实现
-- ✅ 50+ 技能模块
+## 作者
 
-### 技术栈统计
-```
-Python      ████████████████████  68.9%
-Shell       ████                  14.7%
-JavaScript  ████                  14.3%
-TypeScript  ▏                     1.1%
-Batchfile   ▏                     1.0%
-```
+庞祥刚 ([@pangxianggang](https://github.com/pangxianggang))
 
----
-
-## 📅 开发时间线
-
-| 日期 | 事件 |
-|------|------|
-| 2026-03-12 | OpenClaw Workspace 仓库创建 |
-| 2026-03-11 | AutoClaw 配置完成，Gateway 冲突解决 |
-| 2026-03-11 | 火星文件管理 V2 正式上线 |
-| 2026-03-11 | 记忆大脑系统集成完成 |
-| 2026-03-10 | MCP 服务器集成完成 |
-| 2026-03-09 | Memory Bank 三大新功能上线 |
-
----
-
-## 👨‍💻 关于作者
-
-<div align="center">
-
-**庞祥刚 (Pang Xianggang)**
-
-[![GitHub](https://img.shields.io/badge/GitHub-pangxianggang-181717?style=for-the-badge&logo=github)](https://github.com/pangxianggang)
-[![Email](https://img.shields.io/badge/Email-pangxianggang@outlook.com-D14836?style=for-the-badge&logo=microsoft-outlook)](mailto:pangxianggang@outlook.com)
-
-| 📍 位置 | 🌐 角色 | 🦞 昵称 |
-|--------|--------|--------|
-| 深圳，中国 | 全栈开发 & AI 爱好者 | 阿里 (Ali) |
-
-**技能栈**:
-```
-Python, JavaScript, TypeScript, React, Next.js, Vue, Node.js
-FastAPI, Flask, Docker, Git, Linux, Nginx, CI/CD
-PostgreSQL, MySQL, Redis, Qdrant, SQLite
-Ollama, LangChain, RAG, LLM Fine-tuning
-```
-
-</div>
-
----
-
-## 📄 开源协议
-
-MIT License - 详见 [LICENSE](LICENSE) 文件
-
----
-
-<div align="center">
-
-**🦞 Powered by curiosity, driven by code**
-
-[⬆ 返回顶部](#-openclaw-ai-agent-workspace)
-
-</div>
+邮箱：pangxianggang@outlook.com
