@@ -1,0 +1,15 @@
+{
+  "name": "openclaw-workspace",
+  "version": "0.1.0",
+  "description": "Chrome extension + Node.js CLI AI coding platform with local file management",
+  "private": true,
+  "scripts": {
+    "lint": "eslint \"火星文件扩展/**/*.js\"",
+    "test": "node --test tests/"
+  },
+  "author": "庞祥刚 <pangxianggang@outlook.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.56.0"
+  }
+}
