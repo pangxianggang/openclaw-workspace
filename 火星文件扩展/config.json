@@ -1,8 +1,0 @@
-{
-  "apiKey": "sk-sp-cec7682a7c994e489716da0ad751ce1e",
-  "apiProvider": "dashscope",
-  "apiModel": "qwen3.5-plus",
-  "apiBaseUrl": "https://coding.dashscope.aliyuncs.com/v1",
-  "workspace": "C:\\Users\\Administrator\\Desktop",
-  "fmCliPath": "C:\\Users\\Administrator\\Desktop\\火星文件\\dist\\cli\\index.js"
-}
